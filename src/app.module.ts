@@ -7,9 +7,9 @@ import { TripsModule } from './trips/trips.module';
 import { BusseatsModule } from './busseats/busseats.module';
 import { TripseatsModule } from './tripseats/tripseats.module';
 import { BookingsModule } from './bookings/bookings.module';
-import { UsersModule } from './users/users.module';
 import {TypeOrmModule} from "@nestjs/typeorm";
 import {ConfigModule} from "@nestjs/config";
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -25,7 +25,7 @@ import {ConfigModule} from "@nestjs/config";
       autoLoadEntities: true, 
       synchronize: true,
     }),
-  RoutesModule, BusesModule, TripsModule, BusseatsModule, TripseatsModule, BookingsModule, UsersModule],
+  RoutesModule, BusesModule, TripsModule, BusseatsModule, TripseatsModule, BookingsModule, AuthModule],
   controllers: [AppController],
   providers: [AppService],
 })
