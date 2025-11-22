@@ -1,3 +1,3 @@
 export const JWT_KEY = 'SECRET_KEY';
-export const EXPIRES_IN = '7d';
+export const EXPIRES_IN = '20d';
 export const TOKEN_NAME = 'auth_trips';
