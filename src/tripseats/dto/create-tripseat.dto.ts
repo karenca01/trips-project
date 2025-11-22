@@ -8,10 +8,10 @@ export enum TripSeatStatus {
 
 export class CreateTripseatDto {
 	@IsUUID()
-	tripId: string; // FK to trips
+	tripId: string; 
 
 	@IsUUID()
-	busSeatId: string; // FK to bus seats
+	busSeatId: string; 
 
 	@IsOptional()
 	@IsEnum(TripSeatStatus)

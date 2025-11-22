@@ -5,10 +5,11 @@ services:
     image: postgres:14.3
     restart: always
     ports:
-      - '5432:5432'
+      - "5432:5432"
     environment:
-      POSTGRES_PASSWORD: ${pass}
-      POSTGRES_DB: ${name}
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${PASS}
+      POSTGRES_DB: ${NAME}
     container_name: tickets_system_db
     volumes:
       - ./postgres:/var/lib/postgresql/data

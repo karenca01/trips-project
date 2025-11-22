@@ -19,7 +19,7 @@ export class CreateUserDto {
 	@IsString()
 	@MinLength(8)
 	@Length(8, 256)
-	userPassword: string; // hashed or plain to hash later
+	userPassword: string; 
 
 	@IsString()
 	@Length(1, 100)

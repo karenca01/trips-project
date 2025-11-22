@@ -9,19 +9,19 @@ import { Type } from 'class-transformer';
 
 export class CreateTripDto {
 	@IsUUID()
-	routeId: string; // FK to routes
+	routeId: string; 
 
 	@IsUUID()
-	busId: string; // FK to buses
+	busId: string; 
 
 	@IsDateString()
-	tripDate: string; // ISO date (YYYY-MM-DD)
+	tripDate: string; 
 
-	tripTime: string; // HH:MM or HH:MM:SS
+	tripTime: string; 
 
 	@Type(() => Number)
 	@IsNumber({ maxDecimalPlaces: 2 })
 	@Min(0)
 	@IsPositive()
-	tripPrice: number; // decimal(10,2)
+	tripPrice: number; 
 }
