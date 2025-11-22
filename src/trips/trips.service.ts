@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { CreateTripDto } from './dto/create-trip.dto';
 import { UpdateTripDto } from './dto/update-trip.dto';
+import {v4 as uuidv4} from 'uuid';
 
 @Injectable()
 export class TripsService {
