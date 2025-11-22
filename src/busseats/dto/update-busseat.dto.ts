@@ -1,4 +1,12 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { CreateBusseatDto } from './create-busseat.dto';
+import { IsUUID, IsString, Length, IsOptional } from 'class-validator';
 
-export class UpdateBusseatDto extends PartialType(CreateBusseatDto) {}
+export class UpdateBusseatDto {
+	@IsOptional()
+	@IsUUID()
+	busId?: string;
+
+	@IsOptional()
+	@IsString()
+	@Length(1, 10)
+	seatNumber?: string;
+}

@@ -1,4 +1,16 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { CreateTripseatDto } from './create-tripseat.dto';
+import { IsUUID, IsEnum, IsOptional } from 'class-validator';
+import { TripSeatStatus } from './create-tripseat.dto';
 
-export class UpdateTripseatDto extends PartialType(CreateTripseatDto) {}
+export class UpdateTripseatDto {
+	@IsOptional()
+	@IsUUID()
+	tripId?: string;
+
+	@IsOptional()
+	@IsUUID()
+	busSeatId?: string;
+
+	@IsOptional()
+	@IsEnum(TripSeatStatus)
+	status?: TripSeatStatus;
+}
