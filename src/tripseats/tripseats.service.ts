@@ -1,27 +1,54 @@
 import { Injectable } from '@nestjs/common';
 import { CreateTripseatDto } from './dto/create-tripseat.dto';
 import { UpdateTripseatDto } from './dto/update-tripseat.dto';
-import {v4 as uuidv4} from 'uuid';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Tripseat } from './entities/tripseat.entity';
+import { NotFoundException } from '@nestjs/common';
 
 @Injectable()
 export class TripseatsService {
-  create(createTripseatDto: CreateTripseatDto) {
-    return 'This action adds a new tripseat';
+  constructor(@InjectRepository(Tripseat) private tripseatRepository: Repository<Tripseat>) { }
+
+  async create(createTripseatDto: CreateTripseatDto) {
+    const tripseat = this.tripseatRepository.create(createTripseatDto);
+    return this.tripseatRepository.save(tripseat);
   }
 
-  findAll() {
-    return `This action returns all tripseats`;
+  async findAll() {
+    return this.tripseatRepository.find({
+      relations : {
+        trip: true,
+        busSeat: true
+      }
+    });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} tripseat`;
+  async findOne(id: string) {
+    const tripseat = await this.tripseatRepository.findOne({
+      where: { tripSeatId: id },
+      relations : {
+        trip: true,
+        busSeat: true
+      }
+    });
+    return tripseat;
   }
 
-  update(id: number, updateTripseatDto: UpdateTripseatDto) {
-    return `This action updates a #${id} tripseat`;
+  async update(id: string, updateTripseatDto: UpdateTripseatDto) {
+    const tripseat = await this.tripseatRepository.findOneBy({ tripSeatId: id });
+    if (!tripseat) {
+      throw new NotFoundException(`Tripseat with ID ${id} not found`);
+    }
+    Object.assign(tripseat, updateTripseatDto);
+    return this.tripseatRepository.save(tripseat);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} tripseat`;
+  async remove(id: string) {
+    const tripseat = await this.tripseatRepository.delete({ tripSeatId: id });
+    if (tripseat.affected === 0) {
+      throw new NotFoundException(`Tripseat with ID ${id} not found`);
+    }
+    return { message: `Tripseat with ID ${id} has been removed` };
   }
 }

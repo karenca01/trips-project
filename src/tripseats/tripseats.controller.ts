@@ -19,16 +19,16 @@ export class TripseatsController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.tripseatsService.findOne(+id);
+    return this.tripseatsService.findOne(id);
   }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateTripseatDto: UpdateTripseatDto) {
-    return this.tripseatsService.update(+id, updateTripseatDto);
+    return this.tripseatsService.update(id, updateTripseatDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.tripseatsService.remove(+id);
+    return this.tripseatsService.remove(id);
   }
 }
