@@ -1,27 +1,53 @@
 import { Injectable } from '@nestjs/common';
 import { CreateBusseatDto } from './dto/create-busseat.dto';
 import { UpdateBusseatDto } from './dto/update-busseat.dto';
-import {v4 as uuidv4} from 'uuid';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Busseat } from './entities/busseat.entity';
+import { NotFoundException } from '@nestjs/common';
 
 @Injectable()
 export class BusseatsService {
-  create(createBusseatDto: CreateBusseatDto) {
-    return 'This action adds a new busseat';
+  constructor(@InjectRepository(Busseat) private busseatRepository: Repository<Busseat>) { }
+
+  async create(createBusseatDto: CreateBusseatDto) {
+    const busseat = this.busseatRepository.create(createBusseatDto);
+    return this.busseatRepository.save(busseat);
   }
 
-  findAll() {
-    return `This action returns all busseats`;
+  async findAll() {
+    return this.busseatRepository.find({
+      relations: {
+        bus: true
+      }
+    });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} busseat`;
+  async findOne(id: string) {
+    const busseat = await this.busseatRepository.findOne({
+      where: { busSeatId: id },
+      relations: {
+        bus: true
+      }
+    });
+    return busseat;
   }
 
-  update(id: number, updateBusseatDto: UpdateBusseatDto) {
-    return `This action updates a #${id} busseat`;
+  async update(id: string, updateBusseatDto: UpdateBusseatDto) {
+    const busseat = await this.busseatRepository.findOneBy({ busSeatId: id });
+    if (!busseat) {
+      throw new NotFoundException(`Busseat with ID ${id} not found`);
+    }
+    Object.assign(busseat, updateBusseatDto);
+    return this.busseatRepository.save(busseat);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} busseat`;
+
+  async remove(id: string) {
+    const busseat = await this.busseatRepository.delete({ busSeatId: id });
+    if (busseat.affected === 0) {
+      throw new NotFoundException(`Busseat with ID ${id} not found`);
+    }
+    return { message: `Busseat with ID ${id} has been removed` };
   }
 }
