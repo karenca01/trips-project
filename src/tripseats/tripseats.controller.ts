@@ -5,7 +5,13 @@ import { UpdateTripseatDto } from './dto/update-tripseat.dto';
 
 @Controller('tripseats')
 export class TripseatsController {
-  constructor(private readonly tripseatsService: TripseatsService) {}
+  constructor(
+    private readonly tripseatsService: TripseatsService,
+  ) {}
+  @Post(':id/reserve')
+  async reserveSeat(@Param('id') tripSeatId: string, @Body('userId') userId: string) {
+    return this.tripseatsService.reserveSeat(tripSeatId, userId);
+  }
 
   @Post()
   create(@Body() createTripseatDto: CreateTripseatDto) {

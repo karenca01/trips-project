@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { BookingsService } from './bookings.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { UpdateBookingDto } from './dto/update-booking.dto';
+//import { user } from '@heroui/react';
 
 @Controller('bookings')
 export class BookingsController {
@@ -9,7 +10,8 @@ export class BookingsController {
 
   @Post()
   create(@Body() createBookingDto: CreateBookingDto) {
-    return this.bookingsService.create(createBookingDto);
+    const { tripSeatId, userId } = createBookingDto;
+    return this.bookingsService.create(createBookingDto, userId, tripSeatId);
   }
 
   @Get()
@@ -19,16 +21,16 @@ export class BookingsController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.bookingsService.findOne(+id);
+    return this.bookingsService.findOne(id);
   }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateBookingDto: UpdateBookingDto) {
-    return this.bookingsService.update(+id, updateBookingDto);
+    return this.bookingsService.update(id, updateBookingDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.bookingsService.remove(+id);
+    return this.bookingsService.remove(id);
   }
 }
