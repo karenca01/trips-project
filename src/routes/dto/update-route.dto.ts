@@ -10,4 +10,9 @@ export class UpdateRouteDto {
 	@IsString()
 	@Length(1, 100)
 	routeDestination?: string;
+
+	@IsOptional()
+	@IsString()
+	@Length(1, 1024)
+	image?: string;
 }
