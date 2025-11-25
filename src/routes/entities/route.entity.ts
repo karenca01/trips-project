@@ -12,6 +12,9 @@ export class Route {
 	@Column({ length: 100 })
 	routeDestination: string;
 
+	@Column({ length: 1024, nullable: true })
+	image?: string;
+
 	@OneToMany(() => Trip, (trip) => trip.route)
 	trips: Trip[];
 }
