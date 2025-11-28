@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { TripsService } from './trips.service';
 import { CreateTripDto } from './dto/create-trip.dto';
 import { UpdateTripDto } from './dto/update-trip.dto';
@@ -10,6 +10,15 @@ export class TripsController {
   @Post()
   create(@Body() createTripDto: CreateTripDto) {
     return this.tripsService.create(createTripDto);
+  }
+
+  @Get()
+  findTrips(
+    @Query('date') date?: string,
+    @Query('origin') origin?: string,
+    @Query('destination') destination?: string,
+  ) {
+    return this.tripsService.searchTrips({ date, origin, destination });
   }
 
   @Get()
