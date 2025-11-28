@@ -38,7 +38,7 @@ export class AuthController {
       secure: false,
       sameSite: "lax",
     })
-    
+
     return;
   }
 
@@ -50,5 +50,16 @@ export class AuthController {
       updateUserDto.userDocument = upload.url;
     }
     return this.authService.update(id, updateUserDto)
+  }
+
+  @Post('logout')
+  async logout(@Res({ passthrough: true }) res: Response) {
+    res.clearCookie('token', {
+      httpOnly: true,
+      secure: false,
+      sameSite: 'lax',
+    });
+
+    return { message: 'Logout successful' };
   }
 }
