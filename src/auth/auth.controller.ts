@@ -1,10 +1,11 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile, Res } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { AwsService } from '../aws/aws.service';
+import type { Response } from 'express';
 
 
 @Controller('auth')
@@ -21,11 +22,24 @@ export class AuthController {
     return this.authService.register(dto);
   }
 
+  // @Post('login')
+  // async login(@Body() loginUserDto: LoginUserDto) {
+  //   const token = await this.authService.login(loginUserDto);
+  //   console.log(token)
+  //   return this.authService.login(loginUserDto);
+  // }
+
   @Post('login')
-  async login(@Body() loginUserDto: LoginUserDto) {
+  async login(@Body() loginUserDto: LoginUserDto, @Res({ passthrough: true }) res: Response) {
     const token = await this.authService.login(loginUserDto);
-    console.log(token)
-    return this.authService.login(loginUserDto);
+    
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "lax",
+    })
+
+    return;
   }
 
   @Patch("/:id")
@@ -36,5 +50,16 @@ export class AuthController {
       updateUserDto.userDocument = upload.url;
     }
     return this.authService.update(id, updateUserDto)
+  }
+
+  @Post('logout')
+  async logout(@Res({ passthrough: true }) res: Response) {
+    res.clearCookie('token', {
+      httpOnly: true,
+      secure: false,
+      sameSite: 'lax',
+    });
+
+    return { message: 'Logout successful' };
   }
 }
