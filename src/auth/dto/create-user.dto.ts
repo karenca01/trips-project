@@ -22,7 +22,7 @@ export class CreateUserDto {
 
     @IsOptional()
     @IsString()
-    @Length(1, 100)
+    @Length(1, 500)
     userDocument?: string;
 
     @IsOptional()

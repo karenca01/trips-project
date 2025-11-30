@@ -15,7 +15,7 @@ export class User {
     @Column({ length: 256 })
     userPassword: string;
 
-    @Column({ length: 100, nullable: true })
+    @Column({ type: 'varchar', length: 500, nullable: true })
     userDocument?: string;
 
     @Column({ default: false })
