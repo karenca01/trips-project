@@ -38,6 +38,7 @@ export class AuthService {
     if (!match) throw new UnauthorizedException('Datos incorrectos');
 
     const payload = {
+      userId: user.userId,
       userEmail: user.userEmail,
     };
 
