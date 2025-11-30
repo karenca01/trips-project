@@ -21,5 +21,6 @@ import { AwsModule } from '../aws/aws.module';
   ],
   controllers: [AuthController],
   providers: [AuthService],
+  exports: [AuthService],
 })
 export class AuthModule {}

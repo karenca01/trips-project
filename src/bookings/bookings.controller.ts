@@ -10,8 +10,7 @@ export class BookingsController {
 
   @Post()
   create(@Body() createBookingDto: CreateBookingDto) {
-    const { tripSeatId, userId } = createBookingDto;
-    return this.bookingsService.create(createBookingDto, userId, tripSeatId);
+    return this.bookingsService.create(createBookingDto);
   }
 
   @Get()
