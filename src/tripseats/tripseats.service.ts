@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, ConflictException } from '@nestjs/common';
 import { CreateTripseatDto } from './dto/create-tripseat.dto';
 import { UpdateTripseatDto } from './dto/update-tripseat.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -56,7 +56,8 @@ export class TripseatsService {
       throw new NotFoundException(`Tripseat with ID ${tripSeatId} not found`);
     }
     if (seat.status !== TripSeatStatus.FREE) {
-      throw new NotFoundException(`Tripseat with ID ${tripSeatId} is not available for reservation`);
+      // If the seat is not free, it's a conflict (already reserved/booked)
+      throw new ConflictException(`Tripseat with ID ${tripSeatId} is not available for reservation`);
     }
     const user = await this.userRepository.findOneBy({ userId });
     if (!user) {
@@ -94,5 +95,36 @@ export class TripseatsService {
       throw new NotFoundException(`Tripseat with ID ${id} not found`);
     }
     return { message: `Tripseat with ID ${id} has been removed` };
+  }
+
+  /**
+   * Devuelve todos los tripseats de un viaje específico y libera
+   * reservas expiradas antes de retornar (TTL = 5 minutos).
+   */
+  async findAllByTrip(tripId: string) {
+    // Liberar expirados (revisamos todos los asientos para mantener consistencia)
+    const seats = await this.tripseatRepository.find({
+      relations: {
+        trip: true,
+        busSeat: true,
+        reservedBy: true,
+      },
+    });
+
+    const now = new Date();
+    const expiredSeats = seats.filter(
+      (seat) => seat.status === TripSeatStatus.RESERVED && seat.reservedAt && now.getTime() - new Date(seat.reservedAt).getTime() > 5 * 60 * 1000,
+    );
+
+    for (const seat of expiredSeats) {
+      seat.status = TripSeatStatus.FREE;
+      seat.reservedAt = undefined;
+      seat.reservedBy = undefined;
+      // eslint-disable-next-line no-await-in-loop
+      await this.tripseatRepository.save(seat);
+    }
+
+    // Finalmente devolver solo los asientos del tripId solicitado
+    return this.tripseatRepository.find({ where: { tripId }, relations: { trip: true, busSeat: true, reservedBy: true } });
   }
 }

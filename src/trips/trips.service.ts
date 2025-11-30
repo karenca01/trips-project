@@ -35,6 +35,21 @@ export class TripsService {
     return trip;
   }
 
+  async searchTrips(filters: any) {
+    const { date, origin, destination } = filters;
+
+    const where: any = {};
+
+    if (date) where.tripDate = date;
+    if (origin) where.route = { routeOrigin: origin };
+    if (destination) where.route = { ...where.route, routeDestination: destination };
+
+    return this.tripRepository.find({
+      where,
+      relations: ['route'],
+    });
+  }
+
   async update(id: string, updateTripDto: UpdateTripDto) {
     const trip = await this.tripRepository.findOneBy({ tripId: id });
     if (!trip) {

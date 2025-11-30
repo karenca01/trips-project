@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { UpdateBookingDto } from './dto/update-booking.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -7,6 +7,7 @@ import { Repository } from 'typeorm';
 import { Tripseat } from 'src/tripseats/entities/tripseat.entity';
 import { User } from 'src/auth/entities/user.entity';
 import { TripSeatStatus } from 'src/tripseats/entities/tripseat.entity';
+import { DataSource } from 'typeorm';
 
 
 @Injectable()
@@ -20,26 +21,71 @@ export class BookingsService {
 
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    private readonly dataSource: DataSource,
   ){}
+  /**
+   * Creates a booking and marks the trip seat as BOOKED within a DB transaction.
+   * Ensures atomicity to avoid race conditions.
+   */
+  async create(createBookingDto: CreateBookingDto) {
+    const { userId, tripSeatId } = createBookingDto;
 
-  async create(createBookingDto: CreateBookingDto, userId: string, tripSeatId: string) {
-    const user = await this.userRepository.findOneBy({userId});
-    if(!user) throw new NotFoundException(`User ${userId} not found`);
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
 
-    const tripSeat = await this.tripseatRepository.findOneBy({tripSeatId});
-    if(!tripSeat) throw new NotFoundException(`Seat ${tripSeatId} not found`);
+    try {
+      const user = await queryRunner.manager.findOne(User, { where: { userId } });
+      if (!user) throw new NotFoundException(`User ${userId} not found`);
 
-    if(tripSeat.status === TripSeatStatus.BOOKED){
-      throw new Error(`Seat ${tripSeatId} is already booked`);
+      const tripSeat = await queryRunner.manager.findOne(Tripseat, { where: { tripSeatId }, relations: ['reservedBy'] });
+      if (!tripSeat) throw new NotFoundException(`Seat ${tripSeatId} not found`);
+
+      // If already booked -> conflict
+      if (tripSeat.status === TripSeatStatus.BOOKED) {
+        throw new ConflictException(`Seat ${tripSeatId} is already booked`);
+      }
+
+      // If reserved, only allow booking by the reserver within TTL (5 minutes)
+      if (tripSeat.status === TripSeatStatus.RESERVED) {
+        const reservedAt = tripSeat.reservedAt ? new Date(tripSeat.reservedAt) : null;
+        const now = new Date();
+        const expired = !reservedAt || now.getTime() - reservedAt.getTime() > 5 * 60 * 1000;
+        if (expired) {
+          throw new ConflictException(`Reservation for seat ${tripSeatId} has expired`);
+        }
+
+        const reserverId = tripSeat.reservedBy ? tripSeat.reservedBy.userId : null;
+        if (reserverId !== userId) {
+          throw new ConflictException(`Seat ${tripSeatId} is reserved by another user`);
+        }
+      }
+
+      const bookingRepo = queryRunner.manager.getRepository(Booking);
+      const tripseatRepo = queryRunner.manager.getRepository(Tripseat);
+
+      const booking = bookingRepo.create({ tripSeatId, userId });
+      const savedBooking = await bookingRepo.save(booking);
+
+      tripSeat.status = TripSeatStatus.BOOKED;
+      await tripseatRepo.save(tripSeat);
+
+      await queryRunner.commitTransaction();
+
+      // Return the saved booking including relations so the caller can see
+      // the trip seat with its updated status immediately.
+      const fullBooking = await bookingRepo.findOne({
+        where: { bookingId: savedBooking.bookingId },
+        relations: ['tripSeat', 'user'],
+      });
+
+      return fullBooking || savedBooking;
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      throw err;
+    } finally {
+      await queryRunner.release();
     }
-
-    const booking = this.bookingRepository.create({tripSeatId, userId});
-    const savedBooking = await this.bookingRepository.save(booking);
-
-    tripSeat.status = TripSeatStatus.BOOKED;
-    await this.tripseatRepository.save(tripSeat);
-
-    return savedBooking;
   }
 
 

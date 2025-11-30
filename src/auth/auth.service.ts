@@ -45,6 +45,17 @@ export class AuthService {
     return token;
   }
 
+  async getUserFromToken(token: string) {
+    try {
+      const payload: any = this.jwtService.verify(token);
+      if (!payload || !payload.userEmail) return null;
+      const user = await this.userRepository.findOneBy({ userEmail: payload.userEmail });
+      return user ?? null;
+    } catch (err) {
+      return null;
+    }
+  }
+
   async update(id: string, updateUserDto: UpdateUserDto) {
     if (updateUserDto.userPassword) {
       updateUserDto.userPassword = bcrypt.hashSync(updateUserDto.userPassword, 5);
