@@ -25,6 +25,16 @@ export class TripsService {
     });
   }
 
+  async findByBus(busId: string) {
+    return this.tripRepository.find({
+      where: { bus: { busId } },
+      relations: {
+        route: true,
+        bus: true,
+      },
+    });
+  }
+
   async findAll() {
     return this.tripRepository.find({
       relations: {
