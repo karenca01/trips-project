@@ -15,6 +15,26 @@ export class TripsService {
     return this.tripRepository.save(trip);
   }
 
+  async findByRoute(routeId: string) {
+    return this.tripRepository.find({
+      where: { route: { routeId } },
+      relations: {
+        route: true,
+        bus: true,
+      },
+    });
+  }
+
+  async findByBus(busId: string) {
+    return this.tripRepository.find({
+      where: { bus: { busId } },
+      relations: {
+        route: true,
+        bus: true,
+      },
+    });
+  }
+
   async findAll() {
     return this.tripRepository.find({
       relations: {

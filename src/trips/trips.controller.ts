@@ -12,7 +12,7 @@ export class TripsController {
     return this.tripsService.create(createTripDto);
   }
 
-  @Get()
+  @Get('search')
   findTrips(
     @Query('date') date?: string,
     @Query('origin') origin?: string,
@@ -24,6 +24,16 @@ export class TripsController {
   @Get()
   findAll() {
     return this.tripsService.findAll();
+  }
+
+  @Get('by-route/:id')
+  findByRoute(@Param('id') id: string) {
+    return this.tripsService.findByRoute(id);
+  }
+  
+  @Get('by-bus/:id')
+  findByBus(@Param('id') id: string) {
+    return this.tripsService.findByBus(id);
   }
 
   @Get(':id')
