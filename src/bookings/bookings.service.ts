@@ -88,6 +88,20 @@ export class BookingsService {
     }
   }
 
+  async findByUserId(userId: string) {
+    return this.bookingRepository.find({
+      where: { userId },
+      relations: [
+        'tripSeat',
+        'tripSeat.trip',
+        'tripSeat.trip.route',
+        'tripSeat.trip.bus',
+        'tripSeat.busSeat',
+        'user'
+      ],
+      order: { bookingId: 'DESC' },
+    });
+  }
 
   findAll() {
     return this.bookingRepository.find({
