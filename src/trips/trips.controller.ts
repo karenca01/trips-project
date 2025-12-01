@@ -26,6 +26,11 @@ export class TripsController {
     return this.tripsService.findAll();
   }
 
+  @Get('by-route/:id')
+  findByRoute(@Param('id') id: string) {
+    return this.tripsService.findByRoute(id);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.tripsService.findOne(id);
