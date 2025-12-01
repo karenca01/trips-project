@@ -16,7 +16,9 @@ export class BusesService {
   }
 
   async findAll() {
-    return this.busRepository.find();
+    return this.busRepository.find({
+      relations: ['trips']
+    });
   }
 
   async findOne(id: string) {
