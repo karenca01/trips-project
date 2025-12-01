@@ -12,7 +12,7 @@ export class TripsController {
     return this.tripsService.create(createTripDto);
   }
 
-  @Get()
+  @Get('search')
   findTrips(
     @Query('date') date?: string,
     @Query('origin') origin?: string,
